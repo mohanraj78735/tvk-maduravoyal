@@ -65,7 +65,11 @@ st.markdown(
 
 # ---------------- DATABASE ----------------
 
-conn = sqlite3.connect("complaints.db", check_same_thread=False)
+conn = sqlite3.connect(
+    "complaints.db",
+    check_same_thread=False
+)
+
 c = conn.cursor()
 
 c.execute('''
@@ -88,12 +92,13 @@ conn.commit()
 # ---------------- LOAD IMAGES ----------------
 
 try:
+
     vijay = Image.open("vijay.jpg")
     flag = Image.open("tvk_flag.png")
 
     st.image(flag, use_container_width=True)
 
-    col1, col2, col3 = st.columns([1,2,1])
+    col1,col2,col3 = st.columns([1,2,1])
 
     with col2:
         st.image(vijay, width=350)
@@ -117,7 +122,10 @@ count_df = pd.read_sql(
     conn
 )
 
-st.metric("📢 Total Complaints", count_df["total"][0])
+st.metric(
+    "📢 Total Complaints",
+    count_df["total"][0]
+)
 
 # ---------------- SIDEBAR ----------------
 
@@ -134,6 +142,33 @@ page = st.sidebar.radio(
         "Admin Dashboard",
         "MLA Dashboard"
     ]
+)
+
+# ---------------- ANNOUNCEMENT ----------------
+
+st.sidebar.subheader("📢 Public Announcement")
+
+announcement = st.sidebar.text_area(
+    "Announcement"
+)
+
+if announcement:
+    st.sidebar.success(announcement)
+
+# ---------------- LIVE CLOCK ----------------
+
+st.sidebar.subheader("⏰ Current Time")
+
+st.sidebar.write(
+    datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+)
+
+# ---------------- OFFICER LOGIN ----------------
+
+st.sidebar.subheader("👮 Officer Login")
+
+officer_name = st.sidebar.text_input(
+    "Officer Name"
 )
 
 # ---------------- STREET LIST ----------------
@@ -180,27 +215,36 @@ def ai_analyzer(problem_text):
     category = "General"
     priority = "Low"
 
-    if "water" in text or "தண்ணீர்" in text:
+    if "water" in text:
         category = "Water Issue"
         priority = "High"
 
-    elif "road" in text or "சாலை" in text:
+    elif "road" in text:
         category = "Road Problem"
         priority = "Medium"
 
-    elif "eb" in text or "current" in text:
+    elif "eb" in text:
         category = "EB Issue"
         priority = "High"
 
-    elif "garbage" in text or "waste" in text:
+    elif "garbage" in text:
         category = "Garbage"
         priority = "Medium"
 
-    elif "women" in text or "harassment" in text:
+    elif "women" in text:
         category = "Women Safety"
         priority = "High"
 
     return category, priority
+
+# ---------------- FAKE DETECTOR ----------------
+
+def fake_detector(problem_text):
+
+    if len(problem_text) < 5:
+        return True
+
+    return False
 
 # ---------------- COMPLAINT FORM ----------------
 
@@ -221,33 +265,54 @@ if page == "Complaint Form":
 
     uploaded_file = st.file_uploader(
         "Photo Upload",
-        type=["png", "jpg", "jpeg"]
+        type=["png","jpg","jpeg"]
     )
 
-    camera_photo = st.camera_input("Take Live Photo")
+    camera_photo = st.camera_input(
+        "Take Live Photo"
+    )
+
+    st.subheader("🎤 Voice Complaint")
+
+    audio_file = st.file_uploader(
+        "Upload Voice Complaint",
+        type=["mp3","wav"]
+    )
+
+    if audio_file:
+        st.audio(audio_file)
 
     category, ai_priority = ai_analyzer(problem)
 
-    st.info(f"AI Detected Category: {category}")
+    st.info(f"AI Category: {category}")
     st.info(f"AI Priority: {ai_priority}")
 
     priority = st.selectbox(
         "Priority",
-        ["High", "Medium", "Low"],
-        index=["High", "Medium", "Low"].index(ai_priority)
+        ["High","Medium","Low"]
     )
+
+    if fake_detector(problem):
+        st.warning("⚠ Possible Fake Complaint")
 
     if st.button("Submit Complaint"):
 
-        tracking_id = "TVK" + str(random.randint(10000,99999))
+        tracking_id = "TVK" + str(
+            random.randint(10000,99999)
+        )
 
-        current_time = datetime.now().strftime("%d-%m-%Y %H:%M")
+        current_time = datetime.now().strftime(
+            "%d-%m-%Y %H:%M"
+        )
 
         if uploaded_file is not None:
 
-            save_path = os.path.join("uploads", uploaded_file.name)
+            save_path = os.path.join(
+                "uploads",
+                uploaded_file.name
+            )
 
-            with open(save_path, "wb") as f:
+            with open(save_path,"wb") as f:
                 f.write(uploaded_file.getbuffer())
 
         if camera_photo is not None:
@@ -257,7 +322,7 @@ if page == "Complaint Form":
                 camera_photo.name
             )
 
-            with open(camera_path, "wb") as f:
+            with open(camera_path,"wb") as f:
                 f.write(camera_photo.getbuffer())
 
         c.execute(
@@ -292,7 +357,7 @@ if page == "Complaint Form":
         conn.commit()
 
         st.success(
-            f"✅ Complaint Submitted Successfully\nTracking ID: {tracking_id}"
+            f"Complaint Submitted ✅\nTracking ID: {tracking_id}"
         )
 
 # ---------------- WOMEN SAFETY ----------------
@@ -301,21 +366,27 @@ if page == "Women Safety":
 
     st.header("👩 பெண்கள் பாதுகாப்பு")
 
-    woman_name = st.text_input("பெயர் அல்லது Anonymous")
+    woman_name = st.text_input(
+        "பெயர் அல்லது Anonymous"
+    )
 
-    woman_phone = st.text_input("Phone Number")
-
-    woman_problem = st.text_area("பாதுகாப்பு புகார்")
+    woman_problem = st.text_area(
+        "பாதுகாப்பு புகார்"
+    )
 
     emergency = st.checkbox("Emergency")
 
     if st.button("Submit Women Complaint"):
 
-        tracking_id = "TVK" + str(random.randint(10000,99999))
+        tracking_id = "TVK" + str(
+            random.randint(10000,99999)
+        )
 
-        current_time = datetime.now().strftime("%d-%m-%Y %H:%M")
+        current_time = datetime.now().strftime(
+            "%d-%m-%Y %H:%M"
+        )
 
-        priority = "High" if emergency else "Medium"
+        priority = "High"
 
         c.execute(
             """
@@ -336,7 +407,7 @@ if page == "Women Safety":
             (
                 tracking_id,
                 woman_name,
-                woman_phone,
+                "",
                 "Women Section",
                 "Women Safety",
                 priority,
@@ -349,11 +420,11 @@ if page == "Women Safety":
         conn.commit()
 
         st.success(
-            f"✅ Women Complaint Submitted\nTracking ID: {tracking_id}"
+            f"Women Complaint Submitted ✅\nTracking ID: {tracking_id}"
         )
 
         if emergency:
-            st.error("🚨 EMERGENCY ALERT SENT")
+            st.error("🚨 SOS ALERT SENT")
 
 # ---------------- TRACKING ----------------
 
@@ -361,7 +432,9 @@ if page == "Tracking":
 
     st.header("🔎 Complaint Tracking")
 
-    search_id = st.text_input("Enter Tracking ID")
+    search_id = st.text_input(
+        "Enter Tracking ID"
+    )
 
     if st.button("Track Complaint"):
 
@@ -376,6 +449,19 @@ if page == "Tracking":
 
             st.dataframe(result)
 
+            st.subheader("⭐ Rate Resolution")
+
+            rating = st.slider(
+                "Rate Service",
+                1,
+                5
+            )
+
+            if st.button("Submit Rating"):
+                st.success(
+                    f"Thanks For Rating {rating} ⭐"
+                )
+
         else:
             st.error("Invalid Tracking ID")
 
@@ -385,19 +471,22 @@ if page == "Area Charts":
 
     st.header("📊 Area Wise Complaints")
 
-    df = pd.read_sql("SELECT * FROM complaints", conn)
+    df = pd.read_sql(
+        "SELECT * FROM complaints",
+        conn
+    )
 
     if not df.empty:
 
-        chart = df.groupby("area").size().reset_index(name="Complaints")
+        chart = df.groupby(
+            "area"
+        ).size().reset_index(
+            name="Complaints"
+        )
 
-        st.bar_chart(chart.set_index("area"))
-
-        category_chart = df.groupby("category").size()
-
-        st.subheader("Category Wise Complaints")
-
-        st.pyplot(category_chart.plot.pie(autopct='%1.1f%%').figure)
+        st.bar_chart(
+            chart.set_index("area")
+        )
 
         st.dataframe(df)
 
@@ -408,10 +497,10 @@ if page == "Area Charts":
 
 if page == "Heat Map":
 
-    st.header("🔥 Red Zone Complaint Heat Map")
+    st.header("🔥 Red Zone Heat Map")
 
     m = folium.Map(
-        location=[13.0732, 80.2016],
+        location=[13.0732,80.2016],
         zoom_start=12
     )
 
@@ -419,7 +508,6 @@ if page == "Heat Map":
         [13.0732,80.2016],
         [13.0827,80.1672],
         [13.0715,80.1547],
-        [13.0732,80.2016],
         [13.0732,80.2016]
     ]
 
@@ -430,7 +518,7 @@ if page == "Heat Map":
         popup="Maduravoyal"
     ).add_to(m)
 
-    st_folium(m, width=1000)
+    st_folium(m,width=1000)
 
 # ---------------- ADMIN DASHBOARD ----------------
 
@@ -449,39 +537,45 @@ if page == "Admin Dashboard":
 
         st.success("Login Successful")
 
-        df = pd.read_sql("SELECT * FROM complaints", conn)
+        df = pd.read_sql(
+            "SELECT * FROM complaints",
+            conn
+        )
 
         st.subheader("📋 All Complaints")
 
-        search = st.text_input("Search Complaint")
-
-        if search:
-            filtered = df[
-                df["name"].str.contains(search, case=False)
-            ]
-            st.dataframe(filtered)
-
-        else:
-            st.dataframe(df)
+        st.dataframe(df)
 
         total = len(df)
 
-        st.metric("Total Complaints", total)
+        st.metric(
+            "Total Complaints",
+            total
+        )
 
-        st.subheader("Update Complaint Status")
+        st.subheader("Update Status")
 
-        update_id = st.text_input("Tracking ID")
+        update_id = st.text_input(
+            "Tracking ID"
+        )
 
         new_status = st.selectbox(
             "Status",
-            ["Pending", "In Progress", "Completed"]
+            [
+                "Pending",
+                "In Progress",
+                "Completed"
+            ]
         )
 
         if st.button("Update Status"):
 
             c.execute(
                 "UPDATE complaints SET status=? WHERE tracking_id=?",
-                (new_status, update_id)
+                (
+                    new_status,
+                    update_id
+                )
             )
 
             conn.commit()
@@ -492,6 +586,98 @@ if page == "Admin Dashboard":
 
         delete_id = st.number_input(
             "Delete Complaint ID",
-             step=1
-)
-            
+            step=1
+        )
+
+        if st.button("Delete Complaint"):
+
+            c.execute(
+                "DELETE FROM complaints WHERE id=?",
+                (delete_id,)
+            )
+
+            conn.commit()
+
+            st.success("Complaint Deleted")
+
+        st.subheader("🛠 Before / After Work")
+
+        before = st.file_uploader(
+            "Before Image",
+            type=["png","jpg"]
+        )
+
+        after = st.file_uploader(
+            "After Image",
+            type=["png","jpg"]
+        )
+
+        if before:
+            st.image(before)
+
+        if after:
+            st.image(after)
+
+    elif username != "" and password != "":
+        st.error("Invalid Login")
+
+# ---------------- MLA DASHBOARD ----------------
+
+if page == "MLA Dashboard":
+
+    st.header("🏛 MLA Smart Dashboard")
+
+    df = pd.read_sql(
+        "SELECT * FROM complaints",
+        conn
+    )
+
+    if not df.empty:
+
+        total = len(df)
+
+        pending = len(
+            df[df["status"] == "Pending"]
+        )
+
+        completed = len(
+            df[df["status"] == "Completed"]
+        )
+
+        high_priority = len(
+            df[df["priority"] == "High"]
+        )
+
+        col1,col2,col3,col4 = st.columns(4)
+
+        col1.metric("Total", total)
+        col2.metric("Pending", pending)
+        col3.metric("Completed", completed)
+        col4.metric("High Priority", high_priority)
+
+        st.subheader("Area Analytics")
+
+        area_chart = df.groupby("area").size()
+
+        st.bar_chart(area_chart)
+
+        st.subheader("Priority Analytics")
+
+        priority_chart = df.groupby(
+            "priority"
+        ).size()
+
+        st.bar_chart(priority_chart)
+
+        st.subheader("🔔 Live Notifications")
+
+        st.info(
+            "5 High Priority Complaints Pending"
+        )
+
+        st.subheader("Recent Complaints")
+
+        st.dataframe(df.tail(10))
+
+    else:
+        st.info("No complaints available")
