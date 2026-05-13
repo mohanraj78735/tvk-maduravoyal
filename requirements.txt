@@ -1,5 +1,7 @@
 streamlit
-pillow
 pandas
-streamlit-folium
+Pillow
 folium
+streamlit-folium
+fpdf
+matplotlib
