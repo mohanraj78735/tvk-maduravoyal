@@ -492,4 +492,6 @@ if page == "Admin Dashboard":
 
         delete_id = st.number_input(
             "Delete Complaint ID",
+             step=1
+)
             
